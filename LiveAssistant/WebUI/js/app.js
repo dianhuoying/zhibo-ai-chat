@@ -1,4 +1,4 @@
-/** �ǲ����� - ��Ӧ����� */
+/** �ǲ����� - ��Ӧ�����?*/
 (function () {
   let statusBar, commentStream, aiReply, quickReplies, settings;
   let folded = false;
@@ -21,16 +21,7 @@
 
   /* ---- ������ ---- */
   function initTitleBar() {
-    var dragEl = document.getElementById('titleBarDrag');
-    dragEl.addEventListener('mousedown', function(e) {
-      if (e.button !== 0) return;
-      var t = e.target;
-      while (t && t !== dragEl) {
-        if (t.tagName === 'BUTTON') return;
-        t = t.parentElement;
-      }
-      LABridge.send('window:drag', {});
-    });
+
     document.getElementById('btnMinimize').addEventListener('click', () => LABridge.send('window:minimize', {}));
     document.getElementById('btnMaximize').addEventListener('click', () => LABridge.send('window:maximize', {}));
     document.getElementById('btnClose').addEventListener('click', () => LABridge.send('window:close', {}));
@@ -64,7 +55,7 @@
     container.innerHTML = '';
     var replies = (quickReplies && quickReplies.replies)
       ? quickReplies.replies.slice(0, 6)
-      : ['лл��������', '��ӭ�����ı�', '�����ע����·', '����������', '���Ͻ���', '���ţ�'];
+      : ['лл��������', '��ӭ�����ı�', '�����ע�����?, '����������', '���Ͻ���', '���ţ�'];
     replies.forEach(function(text) {
       var btn = document.createElement('button');
       btn.className = 'folded-qr-btn';
@@ -137,7 +128,7 @@
   function initPersonaDropdown() {
     const btn = document.getElementById('personaBtn');
     const menu = document.getElementById('personaMenu');
-    const personaMap = { gamer: '?? ��Ϸ����', seller: '?? ��������', companion: '?? �������' };
+    const personaMap = { gamer: '?? ��Ϸ����', seller: '?? ��������', companion: '?? �������? };
 
     btn.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
     document.addEventListener('click', () => menu.classList.remove('open'));
@@ -199,7 +190,7 @@
         document.getElementById('streamInputBar').classList.remove('visible');
         disableStreamInputs();
       } else {
-        btn.textContent = '�ӹ���˷�';
+        btn.textContent = '�ӹ���˷�?;
         btn.classList.remove('auto');
       }
       LABridge.send('mode:takeover', { auto: takeoverAuto });
@@ -285,7 +276,7 @@
     LABridge.on('mode:takeover', (data) => {
       takeoverAuto = data.auto;
       const btn = document.getElementById('btnTakeover');
-      btn.textContent = takeoverAuto ? 'AI ȫ�Զ�' : '�ӹ���˷�';
+      btn.textContent = takeoverAuto ? 'AI ȫ�Զ�' : '�ӹ���˷�?;
       btn.classList.toggle('auto', takeoverAuto);
     });
   }

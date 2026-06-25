@@ -14,7 +14,6 @@ public partial class MainWindow : Window
     private const string WebUiRoot = "WebUI";
     private const int WM_HOTKEY = 0x0312;
     private const int HOTKEY_ID_MUTE = 1;
-
     private ServiceOrchestrator? _orchestrator;
     private NotifyIcon? _trayIcon;
     private bool _isHotkeyRegistered;
@@ -42,7 +41,7 @@ public partial class MainWindow : Window
         await InitializeWebViewAsync();
     }
 
-        private void Window_StateChanged(object sender, EventArgs e)
+    private void Window_StateChanged(object sender, EventArgs e)
     {
         if (WindowState == WindowState.Minimized)
         {
@@ -69,7 +68,7 @@ public partial class MainWindow : Window
         _trayIcon = new NotifyIcon
         {
             Icon = SystemIcons.Application,
-            Text = "鏅烘挱鍔╄亰",
+            Text = "ZhiBo Zhu Liao",
             Visible = false
         };
         _trayIcon.DoubleClick += (s, e) =>
@@ -80,7 +79,6 @@ public partial class MainWindow : Window
         };
     }
 
-    /// <summary>Called from WebView2 callback thread 鈥?must marshal to UI thread</summary>
     public void Fold()
     {
         if (_isFolded) return;
@@ -101,7 +99,6 @@ public partial class MainWindow : Window
         });
     }
 
-    /// <summary>Called from WebView2 callback thread 鈥?must marshal to UI thread</summary>
     public void Unfold()
     {
         if (!_isFolded) return;
@@ -126,6 +123,7 @@ public partial class MainWindow : Window
         var hwnd = new WindowInteropHelper(this).Handle;
         _isHotkeyRegistered = RegisterHotKey(hwnd, HOTKEY_ID_MUTE, 0x0002, 0x4D);
     }
+
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (msg == WM_HOTKEY && wParam.ToInt32() == HOTKEY_ID_MUTE)
@@ -140,7 +138,6 @@ public partial class MainWindow : Window
         }
         return IntPtr.Zero;
     }
-
 
     private async Task InitializeWebViewAsync()
     {
@@ -187,6 +184,11 @@ public partial class MainWindow : Window
             var hwnd = new WindowInteropHelper(this).Handle;
             UnregisterHotKey(hwnd, HOTKEY_ID_MUTE);
         }
+    }
+
+    private void DragBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        DragMove();
     }
 
     [DllImport("user32.dll")]

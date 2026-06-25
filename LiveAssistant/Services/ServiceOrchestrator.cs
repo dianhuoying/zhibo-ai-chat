@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using LiveAssistant.Bridge;
 
@@ -10,12 +10,10 @@ public class ServiceOrchestrator
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
     [DllImport("user32.dll")]
-    private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
-    [DllImport("user32.dll")]
     private static extern bool ReleaseCapture();
 
-    private const uint WM_NCLBUTTONDOWN = 0x00A1;
-    private const int HTCAPTION = 2;
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
     private readonly MainWindow _window;
     public AppState State { get; } = new();
@@ -34,17 +32,16 @@ public class ServiceOrchestrator
         Tts = new TtsService(Dispatcher);
         RegisterHandlers();
     }
-
     private void RegisterHandlers()
     {
         var h = new WindowInteropHelper(_window).Handle;
 
-        // ---- 窗口拖动 ----
-        Dispatcher.Register("window:drag", _ => {
+        // Window drag �� JS sends beginDrag, C# sends WM_NCLBUTTONDOWN to start native drag
+        Dispatcher.Register("window:beginDrag", _ => {
             _window.Dispatcher.Invoke(() => {
-                var handle = new WindowInteropHelper(_window).Handle;
+                var hwnd = new WindowInteropHelper(_window).Handle;
                 ReleaseCapture();
-                SendMessage(handle, WM_NCLBUTTONDOWN, (IntPtr)HTCAPTION, IntPtr.Zero);
+                SendMessage(hwnd, 0xA1, new IntPtr(2), IntPtr.Zero);
             });
             return Task.FromResult<object?>(null);
         });
@@ -123,7 +120,7 @@ public class ServiceOrchestrator
         });
         Dispatcher.Register("voice:preview", d => {
             var voice = d.GetProperty("voice").GetString() ?? "male";
-            _ = Tts.SpeakAsync("你好，这是我的声音样本。", voice switch {
+            _ = Tts.SpeakAsync("Hello", voice switch {
                 "female" => VoiceType.Female,
                 "custom" => VoiceType.Custom,
                 _ => VoiceType.Male
@@ -168,7 +165,7 @@ public class ServiceOrchestrator
         Dispatcher.Register("stream:send", d => {
             var text = d.GetProperty("text").GetString() ?? "";
             Danmaku.Ingest(new LiveComment {
-                UserName = "主播",
+                UserName = "Host",
                 Content = text,
                 IsVip = true,
                 Priority = 100

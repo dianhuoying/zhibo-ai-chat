@@ -20,7 +20,13 @@
             <DropShadowEffect BlurRadius="24" ShadowDepth="0" Opacity="0.6" Color="#000000"/>
         </Border.Effect>
         <Grid>
-            <wv2:WebView2 x:Name="webView" DefaultBackgroundColor="#0A0E17" />
+            <Grid.RowDefinitions>
+                <RowDefinition Height="36"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Rectangle Fill="Transparent" Cursor="Hand"
+                       MouseLeftButtonDown="DragBar_MouseLeftButtonDown" />
+            <wv2:WebView2 Grid.Row="1" x:Name="webView" DefaultBackgroundColor="#0A0E17" />
         </Grid>
     </Border>
 </Window>
