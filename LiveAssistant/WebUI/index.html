@@ -1,0 +1,263 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智播助聊</title>
+<link rel="stylesheet" href="css/main.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="edgeLight"></div>
+
+<div id="app">
+
+<!-- ========== 第1层：标题栏 ========== -->
+<div id="titleBar">
+  <div class="title-bar-drag" id="titleBarDrag">
+    <button id="btnFold" title="折叠窗口">&#x25C0;</button>
+    <span class="title-text">智播助聊</span>
+  </div>
+  <div class="title-bar-btns">
+    <button id="btnMinimize" title="最小化">&#x2500;</button>
+    <button id="btnMaximize" title="最大化">&#x25A1;</button>
+    <button id="btnClose" title="关闭">&#x2715;</button>
+  </div>
+</div>
+
+<!-- 折叠窄条模式 -->
+<div id="foldedBar">
+  <div class="folded-top">
+    <span class="folded-status-dot" id="foldedStatusDot"></span>
+  </div>
+  <div class="folded-middle" id="foldedQuickReplies">
+    <!-- 快捷回复按钮由 JS 动态填充 -->
+  </div>
+  <div class="folded-bottom">
+    <button id="btnUnfold" class="folded-unfold-btn" title="展开">&#x25B6;</button>
+  </div>
+</div>
+
+<!-- ========== 第2层：直播间连接栏 ========== -->
+<div id="connectionBar">
+  <span class="conn-status-dot" id="connStatusDot"></span>
+  <span class="conn-label">直播间地址：</span>
+  <input type="text" id="connUrlInput" class="conn-input" placeholder="请输入直播间URL..." autocomplete="off">
+  <button id="btnConnect" class="conn-btn">连接</button>
+  <span class="conn-platform" id="connPlatform"></span>
+</div>
+
+<!-- ========== 第3层：实时评论流 ========== -->
+<div id="commentStream">
+  <div id="commentList"></div>
+  <div id="streamInputBar">
+    <input type="text" id="streamInput" class="stream-input" placeholder="手动输入评论..." disabled>
+    <button id="streamSendBtn" class="stream-send-btn" disabled>发送</button>
+  </div>
+</div>
+
+<!-- ========== 第4层：AI 回复展示区 ========== -->
+<div id="aiReply">
+  <div id="aiReplyContent">
+    <span id="aiReplyText"></span>
+    <span id="aiCursor">|</span>
+  </div>
+  <div id="aiReplyStatus">
+    <span id="aiStatusVoice">
+      <span class="speaker-icon">&#x1F50A;</span>
+      <span class="loading-spinner"></span>
+      <span class="status-text" id="aiStatusLabel">就绪</span>
+    </span>
+    <span id="aiStatusText" style="display:none">
+      <span class="check-mark">&#x2714;</span>
+      <span class="status-text">已推送</span>
+    </span>
+  </div>
+</div>
+
+<!-- ========== 第5层：底部控制栏 ========== -->
+<div id="controlBar">
+  <div class="ctrl-left">
+    <div id="personaDropdown" class="persona-dd">
+      <button id="personaBtn" class="ctrl-btn persona-btn">&#x1F3AE; 游戏主播</button>
+      <div class="persona-menu" id="personaMenu">
+        <div class="persona-item selected" data-persona="gamer">&#x1F3AE; 游戏主播</div>
+        <div class="persona-item" data-persona="seller">&#x1F4B0; 带货达人</div>
+        <div class="persona-item" data-persona="companion">&#x1F4AC; 聊天陪伴</div>
+        <div class="persona-divider"></div>
+        <div class="persona-item persona-add" id="personaAdd">+ 自定义新增</div>
+      </div>
+    </div>
+    <div class="voice-btns">
+      <button class="ctrl-btn voice-btn active" data-voice="male" title="男声">&#x2642;</button>
+      <button class="ctrl-btn voice-btn" data-voice="female" title="女声">&#x2640;</button>
+      <button class="ctrl-btn voice-btn" data-voice="custom" title="我的声音">&#x1F399;</button>
+    </div>
+  </div>
+  <div class="ctrl-right">
+    <span class="mute-hint" id="muteHint" title="Ctrl+M">&#x1F507;</span>
+    <button id="btnTakeover" class="ctrl-btn takeover-btn">接管麦克风</button>
+    <button id="btnSettings" class="ctrl-btn settings-btn" title="设置">&#x2699;</button>
+    <select id="platformSelect" class="platform-select">
+      <option value="douyin">抖音</option>
+      <option value="kuaishou">快手</option>
+      <option value="bilibili">B站</option>
+      <option value="tiktok">TikTok</option>
+    </select>
+  </div>
+</div>
+
+<!-- ========== 第6层：可折叠快捷回复面板 ========== -->
+<div id="quickReplyPanel">
+  <div class="qr-header">
+    <span class="qr-title">快捷回复</span>
+    <button id="btnQrToggle" title="折叠">&#x25BC;</button>
+  </div>
+  <div id="qrGrid" class="qr-grid">
+    <button class="qr-btn">谢谢大哥的礼物</button>
+    <button class="qr-btn">欢迎新来的宝</button>
+    <button class="qr-btn">点个关注不迷路</button>
+    <button class="qr-btn">今天就这个价</button>
+    <button class="qr-btn">已经是最低价了</button>
+    <button class="qr-btn">马上讲解</button>
+    <button class="qr-btn">安排！</button>
+    <button class="qr-btn qr-add" id="qrAddBtn">+</button>
+  </div>
+</div>
+
+</div><!-- /#app -->
+
+<!-- ========== 设置面板（弹窗式） ========== -->
+<div id="settingsOverlay">
+  <div class="settings-header">
+    <span class="settings-title">设置</span>
+    <button id="settingsClose" class="settings-close">&#x2715;</button>
+  </div>
+  <div class="settings-body">
+    <div class="settings-tabs">
+      <button class="settings-tab active" data-tab="voice">音色管理</button>
+      <button class="settings-tab" data-tab="stats">数据统计</button>
+      <button class="settings-tab" data-tab="log">日志回放</button>
+    </div>
+    <div class="settings-content">
+      <!-- Tab 1: 音色管理 -->
+      <div class="settings-panel active" id="panelVoice">
+        <div class="voice-card" data-voice="male">
+          <div class="voice-card-info">
+            <span class="voice-card-name">&#x2642; 男声</span>
+            <span class="voice-card-desc">标准男声音色</span>
+          </div>
+          <button class="voice-test-btn" data-voice="male">&#x25B6; 试听</button>
+        </div>
+        <div class="voice-card" data-voice="female">
+          <div class="voice-card-info">
+            <span class="voice-card-name">&#x2640; 女声</span>
+            <span class="voice-card-desc">标准女声音色</span>
+          </div>
+          <button class="voice-test-btn" data-voice="female">&#x25B6; 试听</button>
+        </div>
+        <div class="voice-card" id="voiceCardCustom">
+          <div class="voice-card-info">
+            <span class="voice-card-name">&#x1F399; 我的声音</span>
+            <span class="voice-card-desc" id="voiceCardCustomStatus">未录制</span>
+          </div>
+          <button class="voice-test-btn" id="voiceCardCustomBtn">开始录制</button>
+        </div>
+      </div>
+      <!-- Tab 2: 数据统计 -->
+      <div class="settings-panel" id="panelStats">
+        <div class="stats-grid">
+          <div class="stat-card"><span class="stat-value" id="statTotalReplies">0</span><span class="stat-label">AI回复总条数</span></div>
+          <div class="stat-card"><span class="stat-value" id="statVoiceReplies">0</span><span class="stat-label">语音回复</span></div>
+          <div class="stat-card"><span class="stat-value" id="statTextReplies">0</span><span class="stat-label">文字回复</span></div>
+        </div>
+        <div class="stats-chart-section">
+          <span class="chart-label">互动趋势</span>
+          <canvas id="chartTrend" width="300" height="120"></canvas>
+        </div>
+        <div class="stats-chart-section">
+          <span class="chart-label">弹幕分类占比</span>
+          <canvas id="chartCategory" width="300" height="40"></canvas>
+        </div>
+        <button class="reset-btn" id="btnResetStats">重置</button>
+      </div>
+      <!-- Tab 3: 日志回放 -->
+      <div class="settings-panel" id="panelLog">
+        <div id="logList" class="log-list"></div>
+        <div class="log-actions">
+          <button class="log-btn" id="btnExportLog">导出 JSON</button>
+          <button class="log-btn" id="btnClearLog">清空</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 录音向导弹窗 ========== -->
+<div id="recordWizard">
+  <div class="wizard-header">
+    <span class="wizard-title">声音克隆向导</span>
+    <button id="wizardClose" class="settings-close">&#x2715;</button>
+  </div>
+  <div class="wizard-steps">
+    <span class="wizard-step active" data-step="1">1. 环境检测</span>
+    <span class="wizard-arrow">&#x2192;</span>
+    <span class="wizard-step" data-step="2">2. 文本试读</span>
+    <span class="wizard-arrow">&#x2192;</span>
+    <span class="wizard-step" data-step="3">3. 正式录制</span>
+    <span class="wizard-arrow">&#x2192;</span>
+    <span class="wizard-step" data-step="4">4. 上传与训练</span>
+  </div>
+  <div class="wizard-body" id="wizardBody">
+    <!-- 步骤1: 环境检测 -->
+    <div class="wizard-page active" id="wizPage1">
+      <div class="wiz-noise-meter">
+        <span class="noise-value" id="noiseValue">-- dB</span>
+        <span class="noise-status" id="noiseStatus">检测中...</span>
+      </div>
+      <div class="wiz-hint">建议关闭风扇、空调等噪声源</div>
+      <button class="wiz-btn" id="wizStep1Next" disabled>下一步</button>
+    </div>
+    <!-- 步骤2: 文本试读 -->
+    <div class="wizard-page" id="wizPage2">
+      <div class="wiz-sample-text">春江潮水连海平，海上明月共潮生。滟滟随波千万里，何处春江无月明。</div>
+      <button class="wiz-btn" id="wizStep2Record">开始录制 (15秒)</button>
+      <button class="wiz-btn secondary" id="wizStep2Play" disabled>回放试听</button>
+      <div class="wiz-nav">
+        <button class="wiz-btn secondary" id="wizStep2Prev">上一步</button>
+        <button class="wiz-btn" id="wizStep2Next" disabled>下一步</button>
+      </div>
+    </div>
+    <!-- 步骤3: 正式录制 -->
+    <div class="wizard-page" id="wizPage3">
+      <div class="wiz-sample-text" id="wizLongText">录制将包括不同语气和情绪的长文本采样，请保持自然语速朗读。</div>
+      <div class="wiz-progress"><div class="wiz-progress-fill" id="wizProgress3"></div></div>
+      <button class="wiz-btn" id="wizStep3Record">开始录制 (5分钟)</button>
+      <div class="wiz-nav">
+        <button class="wiz-btn secondary" id="wizStep3Prev">上一步</button>
+        <button class="wiz-btn" id="wizStep3Next" disabled>完成录制</button>
+      </div>
+    </div>
+    <!-- 步骤4: 上传与训练 -->
+    <div class="wizard-page" id="wizPage4">
+      <div class="wiz-progress"><div class="wiz-progress-fill" id="wizProgress4"></div></div>
+      <span class="wiz-status" id="wizStatus4">上传中...</span>
+      <div class="wiz-nav">
+        <button class="wiz-btn secondary" id="wizStep4Prev">上一步</button>
+        <button class="wiz-btn" id="wizStep4Done" disabled>完成</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/bridge.js"></script>
+<script src="js/commentstream.js"></script>
+<script src="js/aipreview.js"></script>
+<script src="js/quick_replies.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
